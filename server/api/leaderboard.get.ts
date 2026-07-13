@@ -1,24 +1,33 @@
 // Cached so N page views cost at most one GitHub fetch per maxAge window. SWR
-// serves stale instantly and revalidates in the background. The handler body
-// (GitHub fetch + snapshot write) runs only on a cache miss.
+// serves stale instantly and revalidates in the background. Once the event is
+// fired, the frozen standings are served and GitHub is never hit again.
 export default defineCachedEventHandler(
   async () => {
+    const state = await readRuntimeState();
+
+    if (state.final) {
+      return {
+        entries: state.final.standings,
+        stats: state.final.stats,
+        fetchedAt: state.final.finalizedAt,
+      };
+    }
+
     const token = useRuntimeConfig().githubToken;
     if (!token) {
       throw createError({ statusCode: 400, statusMessage: "NUXT_GITHUB_TOKEN is not set" });
     }
 
     const result = await fetchLeaderboard(eventConfig, token);
+    const entries = applyCredits(result.entries, state.credits);
     const fetchedAt = new Date().toISOString();
 
-    const state = await readRuntimeState();
-    const order = result.entries.map((entry) => entry.login);
-    const last = state.snapshots.at(-1);
-    if (!last || last.order.join("\n") !== order.join("\n")) {
-      await writeRuntimeState(pushSnapshot(state, order, fetchedAt));
-    }
+    await appendSnapshot(
+      entries.map((entry) => entry.login),
+      fetchedAt,
+    );
 
-    return { ...result, fetchedAt };
+    return { entries, stats: result.stats, fetchedAt };
   },
   { maxAge: 300, swr: true, name: "leaderboard", getKey: () => "current" },
 );

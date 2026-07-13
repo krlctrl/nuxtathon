@@ -1,0 +1,39 @@
+import type { LeaderboardEntry, ManualCredit } from "../types/event";
+
+// Merge admin credits into the GitHub-derived ranking, then re-sort and re-rank.
+// A credit for a login not in the list (issue closed without a PR) becomes a new
+// entry; its avatar comes from the github.com/<login>.png redirect.
+export function applyCredits(
+  entries: LeaderboardEntry[],
+  credits: ManualCredit[],
+): LeaderboardEntry[] {
+  const byLogin = new Map(entries.map((e) => [e.login, { ...e }]));
+
+  for (const credit of credits) {
+    const existing = byLogin.get(credit.login);
+    if (existing) {
+      existing.manualCredits += credit.amount;
+    } else {
+      byLogin.set(credit.login, {
+        login: credit.login,
+        name: null,
+        avatarUrl: `https://github.com/${credit.login}.png?size=80`,
+        closedIssues: 0,
+        mergedPRs: 0,
+        manualCredits: credit.amount,
+        score: 0,
+        rank: 0,
+      });
+    }
+  }
+
+  const merged = [...byLogin.values()];
+  for (const e of merged) e.score = e.closedIssues + e.manualCredits;
+  merged.sort(
+    (a, b) => b.score - a.score || b.mergedPRs - a.mergedPRs || a.login.localeCompare(b.login),
+  );
+  merged.forEach((e, i) => {
+    e.rank = i + 1;
+  });
+  return merged;
+}

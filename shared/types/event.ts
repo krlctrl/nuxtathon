@@ -53,9 +53,24 @@ export interface ManualCredit {
   note: string;
 }
 
-// Mutable, admin-writable state. Lives in KV, never in the repo.
+// A frozen event result. Written on "fire" and kept so the ranking stops moving
+// as PRs keep merging after the event.
+export interface FinalResult {
+  finalizedAt: string;
+  title: string;
+  startsAt: string;
+  endsAt: string;
+  stats: EventStats;
+  standings: LeaderboardEntry[];
+}
+
+// Mutable, admin-writable state. Snapshots live under a separate storage key
+// (written by the leaderboard handler) so they never clobber these fields.
 export interface RuntimeState {
   prizesReleased: boolean;
   credits: ManualCredit[];
-  snapshots: Snapshot[];
+  // Set once the event is fired; the public view then serves this, not GitHub.
+  final: FinalResult | null;
+  // Past finalized events, retained across resets.
+  archive: FinalResult[];
 }

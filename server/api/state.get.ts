@@ -2,12 +2,13 @@
 // the snapshot history the client needs to drive the intro reshuffle.
 export default defineEventHandler(async () => {
   const state = await readRuntimeState();
+  const snapshots = await readSnapshots();
   const phase = resolvePhase(eventConfig, state.prizesReleased);
 
   return {
     config: eventConfig,
     phase,
     prizesReleased: state.prizesReleased,
-    snapshots: state.snapshots,
+    snapshots,
   };
 });
