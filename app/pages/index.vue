@@ -52,9 +52,7 @@ const dateRange = computed(() => {
 </script>
 
 <template>
-  <main
-    class="flex flex-col items-center justify-center gap-8 min-h-[100dvh] px-5 py-12 text-center"
-  >
+  <main class="flex flex-1 flex-col items-center justify-center gap-8 px-5 py-12 text-center">
     <NuxtMark
       class="relative z-10 w-16 h-auto animate-logo-in motion-reduce:animate-none [filter:drop-shadow(0_0_10px_rgba(0,220,130,0.35))]"
     />

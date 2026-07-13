@@ -4,8 +4,9 @@
     <div class="bg-vignette" aria-hidden="true" />
     <div class="bg-scanlines" aria-hidden="true" />
 
-    <div class="relative z-10">
+    <div class="relative z-10 flex min-h-dvh flex-col">
       <slot />
+      <AppFooter />
     </div>
   </div>
 </template>
