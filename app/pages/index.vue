@@ -9,6 +9,8 @@ if (showLeaderboard.value) {
   await store.loadLeaderboard();
 }
 
+const winner = computed(() => (store.phase === "results" ? (store.leaderboard[0] ?? null) : null));
+
 const updatedAt = computed(() => {
   if (!store.fetchedAt || !store.config) return "";
   return new Intl.DateTimeFormat("en-GB", {
@@ -64,10 +66,12 @@ const dateRange = computed(() => {
         v-html="description"
       />
       <EventCountdown
+        v-if="store.phase !== 'results'"
         :phase="store.phase"
         :starts-at="store.config.startsAt"
         :ends-at="store.config.endsAt"
       />
+      <WinnerReveal v-else-if="winner" :entry="winner" />
       <p class="font-mono text-[0.72rem] tracking-[0.2em] uppercase text-muted">{{ dateRange }}</p>
       <a
         href="https://github.com/nuxt/nuxt/issues"

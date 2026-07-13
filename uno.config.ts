@@ -71,6 +71,8 @@ export default defineConfig({
         "fade-up":
           "{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}",
         "logo-in": "{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}",
+        "champ-in":
+          "{0%{opacity:0;transform:scale(0.5)}70%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}",
       },
       durations: {
         blink: "1.2s",
@@ -84,6 +86,7 @@ export default defineConfig({
         neon: "7s",
         "fade-up": "0.6s",
         "logo-in": "0.5s",
+        "champ-in": "0.7s",
       },
       timingFns: {
         blink: "steps(1)",
@@ -97,6 +100,7 @@ export default defineConfig({
         neon: "linear",
         "fade-up": "ease-out",
         "logo-in": "cubic-bezier(0.2,0.8,0.2,1.2)",
+        "champ-in": "ease-out",
       },
       counts: { blink: "infinite", scan: "infinite", neon: "infinite" },
       // Per-animation delay and fill, so one `animate-*` utility carries the full
@@ -112,6 +116,7 @@ export default defineConfig({
         neon: { "animation-delay": "1.7s" },
         "fade-up": { "animation-delay": "1.15s", "animation-fill-mode": "both" },
         "logo-in": { "animation-delay": "1.4s", "animation-fill-mode": "both" },
+        "champ-in": { "animation-delay": "0.15s", "animation-fill-mode": "both" },
       },
     },
   },
@@ -126,5 +131,8 @@ export default defineConfig({
       "inline-block w-2 h-2 rounded-full bg-amber shadow-[0_0_10px_var(--amber)] animate-blink motion-reduce:animate-none",
     // Terminal-style action. Uppercase mono with a hover-to-neon border.
     btn: "inline-flex items-center gap-2 px-4 py-2 font-mono text-sm uppercase tracking-wider border border-line bg-surface text-fg transition-colors hover:(border-primary text-primary) disabled:(opacity-40 pointer-events-none)",
+    // Text input matching the terminal surface.
+    input:
+      "rounded border border-line bg-surface px-2 py-1 font-mono text-sm text-fg outline-none focus:border-primary",
   },
 });
