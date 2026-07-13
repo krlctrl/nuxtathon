@@ -1,0 +1,13 @@
+node_modules
+.output
+.nuxt
+.nitro
+.data
+.cache
+dist
+coverage
+.env
+.env.*
+.git
+.scripts
+CLAUDE.md
