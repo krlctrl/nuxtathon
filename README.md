@@ -27,15 +27,15 @@ and merged PRs (both bot-free).
 
 Static event config lives in `config/event.json`:
 
-| Field | Meaning |
-| --- | --- |
-| `title` | Hero title, e.g. "Nuxtathon" |
-| `eyebrow` | Kicker above the title |
-| `description` | Short blurb, Markdown |
-| `startsAt` | Event start, ISO 8601 UTC |
-| `endsAt` | Event end, ISO 8601 UTC |
+| Field              | Meaning                                    |
+| ------------------ | ------------------------------------------ |
+| `title`            | Hero title, e.g. "Nuxtathon"               |
+| `eyebrow`          | Kicker above the title                     |
+| `description`      | Short blurb, Markdown                      |
+| `startsAt`         | Event start, ISO 8601 UTC                  |
+| `endsAt`           | Event end, ISO 8601 UTC                    |
 | `qualifyingBefore` | Issues created before this instant qualify |
-| `displayTimeZone` | IANA zone for rendering dates, e.g. "UTC" |
+| `displayTimeZone`  | IANA zone for rendering dates, e.g. "UTC"  |
 
 Dates are absolute UTC instants; the timezone only affects display.
 

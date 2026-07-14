@@ -9,6 +9,11 @@ export default defineNuxtConfig({
     githubToken: "",
     adminUser: "",
     adminPassword: "",
+    public: {
+      // Public site origin for absolute OG/canonical URLs. Set via
+      // NUXT_PUBLIC_SITE_URL, e.g. "https://nuxtathon.live".
+      siteUrl: "",
+    },
   },
   nitro: {
     // Single self-hosted instance: one process, so filesystem storage is both
