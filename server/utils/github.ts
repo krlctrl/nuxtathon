@@ -7,11 +7,20 @@ interface PrAuthor {
   name?: string | null;
 }
 
+interface ContributorUser {
+  login: string;
+  name: string | null;
+  avatarUrl: string;
+}
+
 interface PrNode {
   number: number;
   mergedAt: string;
   author: PrAuthor | null;
   closingIssuesReferences: { nodes: { number: number; createdAt: string }[] };
+  // Commit authors carry co-authors (from Co-authored-by trailers, resolved to
+  // GitHub accounts). `user` is null when the email is not linked to an account.
+  commits: { nodes: { commit: { authors: { nodes: { user: ContributorUser | null }[] } } }[] };
 }
 
 interface SearchPage {
@@ -51,6 +60,21 @@ const SEARCH_QUERY = `
             nodes {
               number
               createdAt
+            }
+          }
+          commits(first: 50) {
+            nodes {
+              commit {
+                authors(first: 10) {
+                  nodes {
+                    user {
+                      login
+                      name
+                      avatarUrl
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -132,21 +156,63 @@ async function countHumanPrs(token: string, search: string): Promise<number> {
 }
 
 // Bot accounts that can appear as regular users, on top of the __typename check.
+// Bots + AI-agent co-author attributions (e.g. "claude" from a Co-authored-by
+// trailer): credit belongs to the human, per the Nuxtathon rules.
 const BOT_LOGINS = new Set(
-  ["renovate", "dependabot", "dependabot-preview", "autofix-ci", "github-actions", "codecov"].map(
-    (l) => l.toLowerCase(),
-  ),
+  [
+    "renovate",
+    "dependabot",
+    "dependabot-preview",
+    "autofix-ci",
+    "github-actions",
+    "codecov",
+    "claude",
+    "devin-ai-integration",
+    "cursoragent",
+    "copilot",
+  ].map((l) => l.toLowerCase()),
 );
 
-function makeEntry(author: PrAuthor): LeaderboardEntry {
+// Commit co-authors carry the "[bot]" suffix (e.g. "autofix-ci[bot]"), which the
+// bare denylist misses; the suffix is GitHub's own marker for bot accounts.
+const isBotLogin = (login: string): boolean =>
+  login.endsWith("[bot]") || BOT_LOGINS.has(login.toLowerCase());
+
+interface Tally {
+  login: string;
+  name: string | null;
+  avatarUrl: string;
+  issues: Set<number>;
+  prs: number;
+}
+
+// Everyone who worked on a PR: its linked commit authors (which include
+// Co-authored-by trailers), falling back to the PR opener when no commit author
+// resolves to an account. Bots are dropped.
+function collectContributors(pr: PrNode): Map<string, ContributorUser> {
+  const contributors = new Map<string, ContributorUser>();
+  for (const node of pr.commits.nodes) {
+    for (const author of node.commit.authors.nodes) {
+      const user = author.user;
+      if (user && !isBotLogin(user.login)) contributors.set(user.login, user);
+    }
+  }
+  if (contributors.size === 0 && pr.author?.__typename === "User" && !isBotLogin(pr.author.login)) {
+    const a = pr.author;
+    contributors.set(a.login, { login: a.login, name: a.name ?? null, avatarUrl: a.avatarUrl });
+  }
+  return contributors;
+}
+
+function toEntry(tally: Tally): LeaderboardEntry {
   return {
-    login: author.login,
-    name: author.name ?? null,
-    avatarUrl: author.avatarUrl,
-    closedIssues: 0,
-    mergedPRs: 0,
+    login: tally.login,
+    name: tally.name,
+    avatarUrl: tally.avatarUrl,
+    closedIssues: tally.issues.size,
+    mergedPRs: tally.prs,
     manualCredits: 0,
-    score: 0,
+    score: tally.issues.size,
     rank: 0,
   };
 }
@@ -176,31 +242,39 @@ export async function fetchLeaderboard(
 
   const prs = await fetchEventPrs(token, from, to);
 
-  const byLogin = new Map<string, LeaderboardEntry>();
-  const coreByLogin = new Map<string, LeaderboardEntry>();
-  for (const pr of prs) {
-    const author = pr.author;
-    if (!author || author.__typename !== "User" || BOT_LOGINS.has(author.login.toLowerCase())) {
-      continue;
-    }
+  const byLogin = new Map<string, Tally>();
+  const coreByLogin = new Map<string, Tally>();
+  const allIssues = new Set<number>();
 
+  for (const pr of prs) {
     const qualifying = pr.closingIssuesReferences.nodes.filter(
       (issue) => Date.parse(issue.createdAt) < cutoff,
     );
     if (qualifying.length === 0) continue;
+    const issueNumbers = qualifying.map((issue) => issue.number);
+    for (const n of issueNumbers) allIssues.add(n);
 
-    const target = coreSet.has(author.login.toLowerCase()) ? coreByLogin : byLogin;
-    const entry = target.get(author.login) ?? makeEntry(author);
-    entry.closedIssues += qualifying.length;
-    entry.mergedPRs += 1;
-    entry.score = entry.closedIssues + entry.manualCredits;
-    target.set(author.login, entry);
+    // Full credit for every contributor; issues are deduped per person via the
+    // set, so the same issue counts once even across several of their PRs.
+    for (const contributor of collectContributors(pr).values()) {
+      const target = coreSet.has(contributor.login.toLowerCase()) ? coreByLogin : byLogin;
+      const tally = target.get(contributor.login) ?? {
+        login: contributor.login,
+        name: contributor.name,
+        avatarUrl: contributor.avatarUrl,
+        issues: new Set<number>(),
+        prs: 0,
+      };
+      for (const n of issueNumbers) tally.issues.add(n);
+      tally.prs += 1;
+      target.set(contributor.login, tally);
+    }
   }
 
-  const entries = rank([...byLogin.values()]);
-  const coreTeam = rank([...coreByLogin.values()]);
+  const entries = rank([...byLogin.values()].map(toEntry));
+  const coreTeam = rank([...coreByLogin.values()].map(toEntry));
 
-  const issuesClosed = [...entries, ...coreTeam].reduce((sum, e) => sum + e.closedIssues, 0);
+  const issuesClosed = allIssues.size;
   const merged = prs.filter((pr) => isHuman(pr.author)).length;
   const submitted = await countHumanPrs(
     token,

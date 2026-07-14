@@ -4,6 +4,16 @@
   "description": "The first **Nuxt** community hackathon. Two days, one mission: close as many open `nuxt/nuxt` issues as we can.",
   "startsAt": "2026-07-18T00:00:00.000Z",
   "endsAt": "2026-07-19T23:59:59.999Z",
-  "qualifyingBefore": "2026-07-13T00:00:00.000Z",
+  "qualifyingBefore": "2026-07-14T00:00:00.000Z",
+  "coreTeam": [
+    "danielroe",
+    "atinux",
+    "pi0",
+    "TheAlexLichter",
+    "harlan-zw",
+    "huang-julien",
+    "antfu",
+    "lihbr"
+  ],
   "displayTimeZone": "UTC"
 }

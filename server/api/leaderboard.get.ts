@@ -1,3 +1,20 @@
+import { createHash } from "node:crypto";
+
+// Cache key from the scoring-relevant config, so any change to the window,
+// cutoff, or core team busts the cache (dev edits and deploys alike).
+const configKey = (): string =>
+  createHash("sha256")
+    .update(
+      JSON.stringify([
+        eventConfig.startsAt,
+        eventConfig.endsAt,
+        eventConfig.qualifyingBefore,
+        eventConfig.coreTeam,
+      ]),
+    )
+    .digest("hex")
+    .slice(0, 12);
+
 // Cached so N page views cost at most one GitHub fetch per maxAge window. SWR
 // serves stale instantly and revalidates in the background. Once the event is
 // fired, the frozen standings are served and GitHub is never hit again.
@@ -34,6 +51,6 @@ export default defineCachedEventHandler(
     maxAge: 300,
     swr: true,
     name: "leaderboard",
-    getKey: () => `${eventConfig.startsAt}:${eventConfig.endsAt}:${eventConfig.qualifyingBefore}`,
+    getKey: configKey,
   },
 );
