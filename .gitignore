@@ -11,6 +11,10 @@ dist
 # Node dependencies
 node_modules
 
+# Local pnpm build-script approvals (pnpm 10+). Not needed in the image and
+# breaks the pnpm 9 build in Docker, which reads it as a workspace root.
+pnpm-workspace.yaml
+
 # Logs
 logs
 *.log

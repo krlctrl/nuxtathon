@@ -11,3 +11,4 @@ coverage
 .git
 .scripts
 CLAUDE.md
+pnpm-workspace.yaml
