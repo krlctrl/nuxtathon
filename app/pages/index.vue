@@ -11,6 +11,9 @@ if (showLeaderboard.value) {
 
 const winner = computed(() => (store.phase === "results" ? (store.leaderboard[0] ?? null) : null));
 
+// Config-driven qualification rules (inline Markdown). Empty array hides them.
+const rules = computed(() => (store.config?.rules ?? []).map((r) => marked.parseInline(r)));
+
 const updatedAt = computed(() => {
   if (!store.fetchedAt || !store.config) return "";
   return new Intl.DateTimeFormat("en-GB", {
@@ -65,6 +68,19 @@ const dateRange = computed(() => {
         class="max-w-[38rem] text-fg leading-[1.6] text-[clamp(1rem,2.5vw,1.2rem)] animate-fade-up motion-reduce:animate-none [&_strong]:(text-mint font-bold) [&_code]:(font-mono text-[0.85em] text-primary bg-surface border border-line rounded px-[0.35em] py-[0.05em])"
         v-html="description"
       />
+      <ul
+        v-if="rules.length"
+        class="flex max-w-[38rem] flex-col gap-2 text-left animate-fade-up motion-reduce:animate-none"
+      >
+        <li
+          v-for="(r, i) in rules"
+          :key="i"
+          class="flex gap-2 font-mono text-[0.8rem] leading-relaxed text-muted [&_strong]:text-mint [&_code]:(text-primary bg-surface border border-line rounded px-[0.3em] py-[0.02em])"
+        >
+          <span class="text-primary" aria-hidden="true">&rsaquo;</span>
+          <span v-html="r" />
+        </li>
+      </ul>
       <EventCountdown
         v-if="store.phase !== 'results'"
         :phase="store.phase"

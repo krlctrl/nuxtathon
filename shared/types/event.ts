@@ -5,6 +5,9 @@ export interface EventConfig {
   eyebrow: string;
   // Markdown. Rendered on the public site.
   description: string;
+  // Short qualification rules shown under the intro (Markdown, inline). Empty
+  // hides the block, so this doubles as the on/off flag.
+  rules: string[];
   // Absolute UTC instants. Timezone is a display concern only (see displayTimeZone).
   startsAt: string;
   endsAt: string;
