@@ -2,6 +2,27 @@
   "name": "nuxtathon",
   "version": "0.1.1",
   "private": true,
+  "description": "Live leaderboard for Nuxtathon, the Nuxt community hackathon.",
+  "keywords": [
+    "github",
+    "hackathon",
+    "leaderboard",
+    "nitro",
+    "nuxt",
+    "nuxtathon",
+    "pinia",
+    "unocss"
+  ],
+  "homepage": "https://nuxtathon.live",
+  "bugs": {
+    "url": "https://github.com/Flo0806/nuxtathon/issues"
+  },
+  "license": "MIT",
+  "author": "Florian Heuberger (https://heuberger.dev)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Flo0806/nuxtathon.git"
+  },
   "type": "module",
   "scripts": {
     "build": "nuxt build",

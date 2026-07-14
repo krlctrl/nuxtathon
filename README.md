@@ -117,6 +117,14 @@ updated build plus a reset:
 
 The archive persists across the reset.
 
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## License
+
+MIT (c) [Florian Heuberger](https://heuberger.dev). See [LICENSE](./LICENSE).
+
 ## Credit
 
 Made with love by [Flo Heuberger](https://heuberger.dev).
