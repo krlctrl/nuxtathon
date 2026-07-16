@@ -89,15 +89,26 @@ const dateRange = computed(() => {
       />
       <WinnerReveal v-else-if="winner" :entry="winner" />
       <p class="font-mono text-[0.72rem] tracking-[0.2em] uppercase text-muted">{{ dateRange }}</p>
-      <a
-        href="https://github.com/nuxt/nuxt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20state%3Aopen%20created%3A%3C2026-07-13"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn animate-fade-up motion-reduce:animate-none"
-      >
-        <span class="i-simple-icons-github" aria-hidden="true" />
-        Browse open issues
-      </a>
+      <div class="flex flex-wrap items-center justify-center gap-3 animate-fade-up motion-reduce:animate-none">
+        <a
+          href="https://github.com/nuxt/nuxt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20state%3Aopen%20created%3A%3C2026-07-13"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn"
+        >
+          <span class="i-simple-icons-github" aria-hidden="true" />
+          Browse open issues
+        </a>
+        <a
+          href="https://discord.gg/3Uxq7qFJF"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn"
+        >
+          <span class="i-simple-icons-discord" aria-hidden="true" />
+          Join the Discord
+        </a>
+      </div>
 
       <section v-if="showLeaderboard" class="mx-auto flex w-full max-w-[42rem] flex-col gap-4">
         <LeaderboardStats :stats="store.stats" />
